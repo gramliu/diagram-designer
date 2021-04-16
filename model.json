@@ -1,0 +1,36 @@
+[
+  {
+    "name": "Event",
+    "fields": {
+      "name": { "type": "String", "required": true },
+      "website": { "type": "String", "required": true },
+      "startTime": { "type": "Number", "required": true },
+      "endTime": { "type": "Number", "required": true },
+      "enableCheckin": { "type": "Boolean", "required": true },
+      "enableProjects": { "type": "Boolean", "required": true },
+      "enableTeams": { "type": "Boolean", "required": true },
+      "enableSponsors": { "type": "Boolean", "required": true },
+      "logoUrl": "String",
+      "essayQuestions": "[String]"
+    }
+  },
+  {
+    "name": "CheckinItem",
+    "fields": {
+      "event": { "type": "Event", "required": true },
+      "name": { "type": "String", "required": true },
+      "description": "String",
+      "startTime": { "type": "Number", "required": true },
+      "endTime": { "type": "Number", "required": true },
+      "points": { "type": "Number", "required": true },
+      "checkinLimit": "Number",
+      "accessLevel": {
+        "type": "String",
+        "enum": ["ALL", "SPONSORS_ONLY", "PARTICIPANTS_ONLY", "ADMINS_ONLY"],
+        "required": true
+      },
+      "active": { "type": "Boolean", "required": true },
+      "enableSelfCheckin": { "type": "Boolean", "required": true }
+    }
+  }
+]
