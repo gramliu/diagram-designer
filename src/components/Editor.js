@@ -18,7 +18,7 @@ const cardStyle = {
 }
 
 const parseField = (fieldName, fieldVal) => {
-  let listItem
+  let listItem = null
   if (typeof fieldVal === "string") {
     listItem = (
       <ListItem>
@@ -27,17 +27,28 @@ const parseField = (fieldName, fieldVal) => {
     )
   } else if (fieldVal.type != null) {
     const type = fieldVal.type
-    const text = `${fieldName}: ${type}`
-    let label = <Typography>{text}</Typography>
-    if (fieldVal.required === true) {
-      console.log("Bolded")
-      label = <Typography style={{ fontWeight: "bold" }}>{text}</Typography>
-    }
-    return (
-      <ListItem>
-        <ListItemText>{label}</ListItemText>
-      </ListItem>
+    const enumVals = fieldVal.enum
+    const weight = fieldVal.required ? "bold" : "normal"
+    const text = `${fieldName}: ${type}${enumVals == null ? "" : "(enum)"}`
+    let label = (
+      <ListItemText
+        primary={text}
+        primaryTypographyProps={{ style: { fontWeight: weight } }}
+      />
     )
+
+    if (fieldVal.enum != null) {
+      const enumText = enumVals.join(" | ")
+      label = (
+        <ListItemText
+          primary={text}
+          primaryTypographyProps={{ style: { fontWeight: weight } }}
+          secondary={enumText}
+          secondaryTypographyProps={{ style: { wordWrap: "normal" } }}
+        />
+      )
+    }
+    listItem = <ListItem>{label}</ListItem>
   }
   return listItem
 }
