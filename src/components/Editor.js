@@ -5,8 +5,14 @@ import {
   ListItem,
   ListItemText,
   Typography,
+  IconButton,
+  TableHead,
+  Table,
+  TableRow,
+  TableCell,
+  TableBody,
 } from "@material-ui/core"
-import { useDrag } from "react-dnd"
+import AddCircleIcon from "@material-ui/icons/AddCircle"
 import { useSelector } from "react-redux"
 
 const cardGalleryStyle = {
@@ -17,65 +23,107 @@ const cardStyle = {
   margin: "1em",
 }
 
-const parseField = (fieldName, fieldVal) => {
-  let listItem = null
-  if (typeof fieldVal === "string") {
-    listItem = (
-      <ListItem>
-        <ListItemText>{`${fieldName}: ${fieldVal}`}</ListItemText>
-      </ListItem>
-    )
-  } else if (fieldVal.type != null) {
-    const type = fieldVal.type
-    const enumVals = fieldVal.enum
-    const weight = fieldVal.required ? "bold" : "normal"
-    const text = `${fieldName}: ${type}${enumVals == null ? "" : "(enum)"}`
-    let label = (
-      <ListItemText
-        primary={text}
-        primaryTypographyProps={{ style: { fontWeight: weight } }}
-      />
-    )
+/**
+ * Parse a field and its type specification into a {@link TableRow}
+ * @param {String} fieldName name of the field
+ * @param {dict} fieldSpec the field's specification (type, enum)
+ * @returns a {@link TableRow} representing the field
+ */
+const parseField = (fieldName, fieldSpec) => {
+  const cells = []
+  if (typeof fieldSpec === "string") {
+    // Simple specifications of the form { fieldName: type }
+    cells.push(<TableCell>{fieldName}</TableCell>)
+    cells.push(<TableCell align="right">{fieldSpec}</TableCell>)
+  } else if (fieldSpec.type != null) {
+    /*
+      Nested specs of the form {
+        fieldName: {
+          type: Type,
+          required: Boolean,
+          enum: [Type]
+        }
+      }
+    */
+    const enumVals = fieldSpec.enum
+    let type = fieldSpec.type
+    const fontStyle = fieldSpec.required ? {
+      fontWeight: "bold",
+      textDecoration: "underline"
+    } : null;
 
-    if (fieldVal.enum != null) {
+    if (enumVals != null) {
+      // if enum type
+      type = `${type} (enum)`
       const enumText = enumVals.join(" | ")
-      label = (
-        <ListItemText
-          primary={text}
-          primaryTypographyProps={{ style: { fontWeight: weight } }}
-          secondary={enumText}
-          secondaryTypographyProps={{ style: { wordWrap: "normal" } }}
-        />
+      return (
+        <>
+          <TableRow>
+            <TableCell rowSpan={2}>{fieldName}</TableCell>
+            <TableCell align="right" style={{ ...fontStyle }}>{type}</TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell align="right">
+              <Typography variant="caption" style={{wordWrap: "normal"}}>
+                {enumText}
+              </Typography>
+            </TableCell>
+          </TableRow>
+        </>
       )
+    } else {
+      cells.push(<TableCell>{fieldName}</TableCell>)
+      cells.push(<TableCell align="right" style={{ ...fontStyle }}>{type}</TableCell>)
     }
-    listItem = <ListItem>{label}</ListItem>
   }
-  return listItem
+  return <TableRow key={fieldName}>{cells}</TableRow>
 }
 
-const parseFields = (fields) => {
-  const listItems = []
+/**
+ * Parse a dictionary of fields representing a single object type
+ * into a table
+ * @param {dict} fields
+ * @returns a {@link Table} representing this type
+ */
+const createCardContent = (fields) => {
+  const tableRows = []
   for (let fieldName in fields) {
     const fieldVal = fields[fieldName]
-    const listItem = parseField(fieldName, fieldVal)
-    listItems.push(listItem)
+    const tableRow = parseField(fieldName, fieldVal)
+    tableRows.push(tableRow)
   }
-  return <List dense={true}>{listItems}</List>
+  return (
+    <Table size="small">
+      <TableHead>
+        <TableRow>
+          <TableCell>Field</TableCell>
+          <TableCell align="right">Type</TableCell>
+        </TableRow>
+      </TableHead>
+      <TableBody>{tableRows}</TableBody>
+    </Table>
+  )
 }
 
+/**
+ * The main content view containing an interactive representation of a data model
+ */
 const Editor = () => {
   const model = useSelector((store) => store.model.model)
   const components = []
   for (let obj of model) {
     const { name, fields } = obj
-    const fieldList = parseFields(fields)
+    const cardContent = createCardContent(fields)
     const card = (
       <div style={cardStyle}>
-        <Card style={{ padding: 0 }}>
+        <Card style={{ padding: 0, maxWidth: "30vw" }}>
           <CardContent>
             <Typography variant="h6">{name}</Typography>
             <hr />
-            {fieldList}
+            {cardContent}
+            <IconButton>
+              <AddCircleIcon style={{ color: "#1565c0" }} />
+            </IconButton>
           </CardContent>
         </Card>
       </div>
