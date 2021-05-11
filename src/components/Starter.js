@@ -6,6 +6,7 @@ import logo from "../assets/logo.png"
 import Snackbar from '@material-ui/core/Snackbar';
 import Alert from '@material-ui/lab/Alert';
 import { useState } from "react"
+import { isModel } from "../util/modelUtil"
 
 const containerStyle = {
   marginTop: "10vh",
@@ -35,7 +36,10 @@ const Starter = () => {
       fileReader.onload = (e) => {
         try {
           const model = JSON.parse(e.target.result)
-          dispatch(actions.model.setModel(model))
+          if (isModel(model)) {
+            dispatch(actions.model.setModel(model))
+            window.localStorage.setItem("model", JSON.stringify(model));
+          }
         } catch (err) {
           console.log("Error occured")
           setShowAlert(true)

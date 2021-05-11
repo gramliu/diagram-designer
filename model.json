@@ -32,5 +32,13 @@
       "active": { "type": "Boolean", "required": true },
       "enableSelfCheckin": { "type": "Boolean", "required": true }
     }
+  },
+  {
+    "name": "Checkin",
+    "fields": {
+      "event": { "type": "Event", "required": true },
+      "user": { "type": "User", "required": true },
+      "item": { "type": "CheckinItem", "required": true }
+    }
   }
 ]
